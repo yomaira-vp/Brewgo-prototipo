@@ -29,8 +29,29 @@
       --danger: #f87171;
     }
 
-    body.large-text {
-      font-size: 112%;
+    /* Cambios reales y visibles cuando Texto Grande está ON */
+    body.large-text .screen-container {
+      font-size: 1.18rem;
+    }
+    body.large-text .screen-container h1 {
+      font-size: 2.05rem !important;
+    }
+    body.large-text .screen-container h2 {
+      font-size: 1.62rem !important;
+    }
+    body.large-text .screen-container p,
+    body.large-text .screen-container label,
+    body.large-text .screen-container span,
+    body.large-text .screen-container div {
+      line-height: 1.5;
+    }
+    body.large-text .btn-primary,
+    body.large-text .btn-secondary,
+    body.large-text .cat-btn,
+    body.large-text .search-input,
+    body.large-text .custom-select {
+      font-size: 1.15rem !important;
+      min-height: 54px !important;
     }
 
     * {
@@ -197,8 +218,9 @@
       width: 100%;
     }
 
-    .search-input {
-      flex: 1;
+    .search-input,
+    .custom-select {
+      width: 100%;
       padding: 12px 14px;
       border-radius: 14px;
       border: 2px solid var(--app-border);
@@ -206,6 +228,10 @@
       color: var(--app-text);
       font-size: 0.98rem;
       min-height: 48px;
+    }
+
+    .search-input {
+      flex: 1;
     }
 
     .btn-voice {
@@ -228,7 +254,6 @@
       color: #000000;
     }
 
-    /* Botones de Categorías */
     .category-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -272,6 +297,37 @@
       background: var(--app-bg);
       border: 1px solid var(--app-border);
       margin-bottom: 4px;
+    }
+
+    .qty-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .qty-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      border: 2px solid var(--coffee-dark);
+      background: var(--app-bg);
+      color: var(--app-text);
+      font-size: 1.3rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    body.high-contrast .qty-btn {
+      border-color: #fde047;
+    }
+
+    .qty-number {
+      font-size: 1.25rem;
+      font-weight: 800;
+      min-width: 32px;
+      text-align: center;
     }
 
     .setting-row {
@@ -396,7 +452,7 @@
           <div class="coffee-logo">☕</div>
           <h1 style="font-size: 1.7rem; font-weight: 800;">Toca para Pedir</h1>
           <p style="font-size: 0.95rem; color: var(--app-muted); line-height: 1.45;">
-            Explora por categorías, busca por voz y ajusta el tamaño o contraste de pantalla a tu gusto.
+            Explora por categorías, personaliza tu pedido con cantidad o pídelo para retiro o a domicilio.
           </p>
           <button class="btn-primary" onclick="goToScreen(2)">
             <span>☕</span> Ver el Menú
@@ -419,11 +475,10 @@
             <button class="btn-voice" onclick="startVoiceRecognition()" title="Usar micrófono">🎙️</button>
           </div>
           <p id="voiceStatus" style="font-size: 0.8rem; margin-top: 8px; opacity: 0.9;">
-            Tip: También puedes tocar una categoría aquí abajo.
+            Toca un producto para elegir tamaño, leche y cantidad.
           </p>
         </div>
 
-        <!-- Guía de Categorías -->
         <div>
           <p style="font-size: 0.88rem; font-weight: 800; margin-bottom: 8px;">📂 Elige una categoría:</p>
           <div class="category-grid">
@@ -435,6 +490,48 @@
         </div>
 
         <div id="menuList" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </section>
+
+      <!-- 9. DETALLE Y PERSONALIZACIÓN DEL PRODUCTO -->
+      <section class="screen" id="screen-9">
+        <button class="btn-secondary" onclick="goToScreen(2)">⬅️ Volver al menú</button>
+
+        <div class="card" style="display:flex; flex-direction:column; gap:6px;">
+          <span class="cat-tag" id="detailCat">Cafés</span>
+          <h2 id="detailName" style="font-size: 1.35rem;">Latte Vainilla</h2>
+          <div id="detailPrice" style="font-weight: 800; font-size: 1.15rem;">$3.50</div>
+          <p id="detailDesc" style="font-size: 0.9rem; color: var(--app-muted);"></p>
+        </div>
+
+        <div class="card" style="display:flex; flex-direction:column; gap:8px;">
+          <label for="optSize" style="font-weight: 800;">1. Tamaño</label>
+          <select id="optSize" class="custom-select" onchange="updateDetailTotal()">
+            <option value="0" data-label="Normal">Normal (Sin costo extra)</option>
+            <option value="0.60" data-label="Grande (+$0.60)">Grande (+$0.60)</option>
+          </select>
+        </div>
+
+        <div class="card" style="display:flex; flex-direction:column; gap:8px;">
+          <label for="optMilk" style="font-weight: 800;">2. Tipo de Leche / Preferencia</label>
+          <select id="optMilk" class="custom-select" onchange="updateDetailTotal()">
+            <option value="0" data-label="Leche normal / Estándar">Leche normal / Estándar</option>
+            <option value="0.50" data-label="Leche de Avena (+$0.50)">Leche de Avena (+$0.50)</option>
+            <option value="0.50" data-label="Sin azúcar / A gusto">Sin azúcar / A gusto</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <p style="font-weight: 800;">3. Cantidad de unidades</p>
+          <div class="qty-box">
+            <button class="qty-btn" onclick="changeDetailQty(-1)">-</button>
+            <span class="qty-number" id="detailQty">1</span>
+            <button class="qty-btn" onclick="changeDetailQty(1)">+</button>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="btnAddCustomized" onclick="addCustomizedToCart()">
+          ✓ Agregar al Carrito ($3.50)
+        </button>
       </section>
 
       <!-- 4. CARRITO -->
@@ -449,18 +546,30 @@
           </div>
         </div>
 
-        <button class="btn-primary" onclick="goToScreen(5)">💳 Pagar Ahora</button>
+        <button class="btn-primary" onclick="goToScreen(5)">💳 Continuar al Pedido</button>
         <button class="btn-secondary" onclick="goToScreen(2)">➕ Seguir Pidiendo</button>
       </section>
 
-      <!-- 5. PAGO -->
+      <!-- 5. PAGO Y TIPO DE ENTREGA (RETIRO O A DOMICILIO) -->
       <section class="screen" id="screen-5">
-        <h2 style="font-size: 1.35rem;">💳 Confirmar Pedido</h2>
-        <div class="card" style="display:flex; flex-direction:column; gap:12px;">
-          <p style="font-size: 1.05rem; font-weight:700;">Punto de Retiro: Barra #2</p>
-          <p style="font-size: 0.9rem; color: var(--app-muted);">
-            Puedes pagar en caja o mediante transferencia al recoger tu orden.
+        <h2 style="font-size: 1.35rem;">💳 Entrega y Confirmación</h2>
+
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+          <label for="deliveryType" style="font-weight: 800;">¿Cómo deseas recibir tu pedido?</label>
+          <select id="deliveryType" class="custom-select" onchange="toggleAddressField()">
+            <option value="pickup">Retirar en Barra #2</option>
+            <option value="delivery">A domicilio</option>
+          </select>
+
+          <div id="addressBox" style="display:none; flex-direction:column; gap:6px; margin-top:4px;">
+            <label for="deliveryAddress" style="font-weight: 700; font-size: 0.9rem;">Dirección de entrega:</label>
+            <input type="text" id="deliveryAddress" class="search-input" placeholder="Ej. Barrio Murciélago, Calle 24..." />
+          </div>
+
+          <p style="font-size: 0.88rem; color: var(--app-muted); margin-top:4px;">
+            Pago en efectivo, tarjeta o transferencia al recibir o retirar.
           </p>
+
           <button class="btn-primary" onclick="confirmOrder()">✅ Confirmar y Enviar Pedido</button>
           <button class="btn-secondary" onclick="goToScreen(4)">⬅️ Volver al Carrito</button>
         </div>
@@ -472,7 +581,7 @@
           <div style="font-size: 52px;">🎉</div>
           <h2 style="color: var(--success); font-size:1.35rem;">¡Pedido Registrado!</h2>
           <p style="font-size: 0.95rem;">
-            Tu orden <strong id="lastOrderCode">#BG-101</strong> ya está en preparación. Tiempo estimado: <strong>4 minutos</strong>.
+            Tu orden <strong id="lastOrderCode">#BG-101</strong> (<span id="lastOrderMode">Retiro en Barra #2</span>) ya está en preparación.
           </p>
           <button class="btn-primary" onclick="goToScreen(3)">📦 Ver Estado de Mis Pedidos</button>
           <button class="btn-secondary" onclick="goToScreen(2)">☕ Seguir Explorando el Menú</button>
@@ -483,7 +592,7 @@
       <section class="screen" id="screen-3">
         <h2 style="font-size: 1.35rem;">📦 Mis Pedidos</h2>
         <p style="font-size: 0.88rem; color: var(--app-muted);">
-          Revisa aquí si tu pedido sigue en preparación o ya está listo para retirar.
+          Revisa aquí el estado de tu pedido y dónde se entregará.
         </p>
         <div id="ordersList" style="display:flex; flex-direction:column; gap:10px;"></div>
       </section>
@@ -570,13 +679,16 @@
       { id: 9, category: "Panadería", name: "🥖 Pan de Yuca Tibio (x3)", price: 2.25, desc: "Recién horneado y suave por dentro" }
     ];
 
+    let selectedProduct = products[0];
+    let detailQty = 1;
     let selectedCategory = "Todos";
-    let cart = [{ name: "☕ Café Latte Vainilla", price: 3.50 }];
+    let cart = [{ name: "☕ Café Latte Vainilla", detail: "Normal · Leche normal", qty: 1, unitPrice: 3.50 }];
     let orders = [
       {
         code: "#BG-100",
         status: "Listo para retirar en Barra #2",
-        items: ["☕ Cappuccino Clásico"],
+        mode: "Retiro en Barra #2",
+        items: ["☕ Cappuccino Clásico (x1)"],
         total: 3.20
       }
     ];
@@ -624,12 +736,66 @@
             <p style="font-size: 0.85rem; color: var(--app-muted); margin-top: 2px;">${p.desc}</p>
             <div style="font-weight: 800; font-size: 1.05rem; margin-top: 6px;">$${p.price.toFixed(2)}</div>
           </div>
-          <button class="btn-primary" style="padding: 10px; min-height: 44px; font-size: 0.95rem;" onclick="addToCart('${p.name}', ${p.price})">
-            ➕ Agregar al Pedido
+          <button class="btn-primary" style="padding: 10px; min-height: 44px; font-size: 0.95rem;" onclick="openProductDetail(${p.id})">
+            ⚙️ Personalizar y Elegir Cantidad
           </button>
         `;
         container.appendChild(div);
       });
+    }
+
+    function openProductDetail(productId) {
+      const found = products.find(item => item.id === productId);
+      if (!found) return;
+      selectedProduct = found;
+      detailQty = 1;
+
+      document.getElementById("detailCat").textContent = found.category;
+      document.getElementById("detailName").textContent = found.name;
+      document.getElementById("detailPrice").textContent = `$${found.price.toFixed(2)}`;
+      document.getElementById("detailDesc").textContent = found.desc;
+      document.getElementById("optSize").value = "0";
+      document.getElementById("optMilk").value = "0";
+      document.getElementById("detailQty").textContent = "1";
+
+      updateDetailTotal();
+      goToScreen(9);
+    }
+
+    function changeDetailQty(delta) {
+      detailQty = Math.max(1, detailQty + delta);
+      document.getElementById("detailQty").textContent = detailQty;
+      updateDetailTotal();
+    }
+
+    function getUnitConfiguredPrice() {
+      const sizeExtra = parseFloat(document.getElementById("optSize").value) || 0;
+      const milkExtra = parseFloat(document.getElementById("optMilk").value) || 0;
+      return selectedProduct.price + sizeExtra + milkExtra;
+    }
+
+    function updateDetailTotal() {
+      const total = getUnitConfiguredPrice() * detailQty;
+      document.getElementById("btnAddCustomized").textContent = `✓ Agregar al Carrito ($${total.toFixed(2)})`;
+    }
+
+    function addCustomizedToCart() {
+      const sizeSel = document.getElementById("optSize");
+      const milkSel = document.getElementById("optMilk");
+      const sizeLabel = sizeSel.options[sizeSel.selectedIndex].dataset.label;
+      const milkLabel = milkSel.options[milkSel.selectedIndex].dataset.label;
+      const unitPrice = getUnitConfiguredPrice();
+
+      cart.push({
+        name: selectedProduct.name,
+        detail: `${sizeLabel} · ${milkLabel}`,
+        qty: detailQty,
+        unitPrice
+      });
+
+      updateCartUI();
+      showToast(`✓ Agregado (${detailQty}x) al carrito`);
+      goToScreen(4);
     }
 
     function startVoiceRecognition() {
@@ -638,7 +804,7 @@
 
       if (!SpeechRec) {
         statusEl.textContent = "Este navegador o celular no permite micrófono directo aquí. Escribe tu búsqueda arriba.";
-        showToast("Micrófono no disponible en este visor. Puedes escribir.");
+        showToast("Micrófono no disponible aquí. Puedes escribir.");
         return;
       }
 
@@ -669,37 +835,48 @@
       }
     }
 
-    function addToCart(name, price) {
-      cart.push({ name, price });
+    function changeCartItemQty(index, delta) {
+      const nextQty = cart[index].qty + delta;
+      if (nextQty <= 0) {
+        cart.splice(index, 1);
+        showToast("Producto quitado del carrito");
+      } else {
+        cart[index].qty = nextQty;
+      }
       updateCartUI();
-      showToast("✓ Agregado al carrito");
-    }
-
-    function removeFromCart(index) {
-      cart.splice(index, 1);
-      updateCartUI();
-      showToast("Producto quitado del carrito");
     }
 
     function updateCartUI() {
       const box = document.getElementById("cartItems");
       box.innerHTML = "";
       let total = 0;
+      let totalUnits = 0;
 
       cart.forEach((item, idx) => {
-        total += item.price;
+        const subtotal = item.unitPrice * item.qty;
+        total += subtotal;
+        totalUnits += item.qty;
+
         const div = document.createElement("div");
         div.className = "card";
         div.style.display = "flex";
-        div.style.justifyContent = "space-between";
-        div.style.alignItems = "center";
+        div.style.flexDirection = "column";
+        div.style.gap = "8px";
         div.style.padding = "12px 14px";
         div.innerHTML = `
-          <div>
-            <strong style="font-size: 0.96rem;">${item.name}</strong>
-            <div style="font-weight: 800; font-size: 0.95rem; margin-top: 2px;">$${item.price.toFixed(2)}</div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+            <div>
+              <strong style="font-size: 0.98rem;">${item.name}</strong>
+              <p style="font-size: 0.8rem; color: var(--app-muted);">${item.detail}</p>
+              <div style="font-weight: 800; font-size: 0.98rem; margin-top: 4px;">$${subtotal.toFixed(2)}</div>
+            </div>
+            <button class="btn-secondary" style="width: auto; padding: 4px 10px; min-height: 34px; color: var(--danger);" onclick="changeCartItemQty(${idx}, -999)">❌</button>
           </div>
-          <button class="btn-secondary" style="width: auto; padding: 6px 12px; min-height: 38px; color: var(--danger);" onclick="removeFromCart(${idx})">❌</button>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <button class="qty-btn" style="width:36px; height:36px; font-size:1.1rem;" onclick="changeCartItemQty(${idx}, -1)">-</button>
+            <strong>Cant: ${item.qty}</strong>
+            <button class="qty-btn" style="width:36px; height:36px; font-size:1.1rem;" onclick="changeCartItemQty(${idx}, 1)">+</button>
+          </div>
         `;
         box.appendChild(div);
       });
@@ -709,7 +886,13 @@
       }
 
       document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
-      document.getElementById("cartCount").textContent = cart.length;
+      document.getElementById("cartCount").textContent = totalUnits;
+    }
+
+    function toggleAddressField() {
+      const type = document.getElementById("deliveryType").value;
+      const box = document.getElementById("addressBox");
+      box.style.display = type === "delivery" ? "flex" : "none";
     }
 
     function confirmOrder() {
@@ -718,28 +901,42 @@
         return;
       }
 
+      const type = document.getElementById("deliveryType").value;
+      const address = document.getElementById("deliveryAddress").value.trim();
+
+      if (type === "delivery" && !address) {
+        showToast("Escribe tu dirección para envío a domicilio");
+        return;
+      }
+
+      const modeText = type === "delivery" ? `A domicilio (${address})` : "Retiro en Barra #2";
       const code = `#BG-${orderCounter++}`;
-      const total = cart.reduce((acc, item) => acc + item.price, 0);
-      const itemNames = cart.map(item => item.name);
+      const total = cart.reduce((acc, item) => acc + item.unitPrice * item.qty, 0);
+      const itemNames = cart.map(item => `${item.name} (x${item.qty})`);
 
       orders.unshift({
         code,
-        status: "En preparación (Barra #2)",
+        status: type === "delivery" ? "En preparación para envío" : "En preparación (Barra #2)",
+        mode: modeText,
         items: itemNames,
         total
       });
 
       document.getElementById("lastOrderCode").textContent = code;
+      document.getElementById("lastOrderMode").textContent = modeText;
       cart = [];
+      document.getElementById("deliveryAddress").value = "";
       updateCartUI();
       renderOrders();
       goToScreen(6);
     }
 
     function markOrderReady(index) {
-      orders[index].status = "¡Listo para retirar en Barra #2!";
+      orders[index].status = orders[index].mode.includes("domicilio")
+        ? "¡Repartidor en camino!"
+        : "¡Listo para retirar en Barra #2!";
       renderOrders();
-      showToast(`✓ Pedido ${orders[index].code} marcado como listo`);
+      showToast(`✓ Pedido ${orders[index].code} actualizado`);
     }
 
     function renderOrders() {
@@ -753,14 +950,15 @@
         div.style.flexDirection = "column";
         div.style.gap = "8px";
         div.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; flex-wrap:wrap;">
             <strong style="font-size:1.05rem;">Pedido ${ord.code}</strong>
             <span class="status-pill">${ord.status}</span>
           </div>
-          <p style="font-size:0.88rem; color: var(--app-muted);">Productos: ${ord.items.join(", ")}</p>
+          <p style="font-size:0.86rem; font-weight:700;">Entrega: ${ord.mode}</p>
+          <p style="font-size:0.86rem; color: var(--app-muted);">Productos: ${ord.items.join(", ")}</p>
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
             <strong>Total: $${ord.total.toFixed(2)}</strong>
-            ${!ord.status.includes("Listo") ? `<button class="btn-secondary" style="width:auto; padding:6px 12px; min-height:36px; font-size:0.85rem;" onclick="markOrderReady(${idx})">Marcar listo</button>` : ""}
+            ${!ord.status.includes("Listo") && !ord.status.includes("camino") ? `<button class="btn-secondary" style="width:auto; padding:6px 12px; min-height:36px; font-size:0.85rem;" onclick="markOrderReady(${idx})">Actualizar estado</button>` : ""}
           </div>
         `;
         box.appendChild(div);
