@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrewGo — Menú Accesible por Voz e Iconos</title>
+  <style>
+    :root {
+      --coffee-dark: #3b2212;
+      --coffee-med: #5c3a21;
+      --app-bg: #f5f0eb;
+      --app-card: #ffffff;
+      --app-text: #2c221e;
+      --app-muted: #6b5e55;
+      --app-border: #e6dfd5;
+      --success: #15803d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #2b1f1a;
+      color: var(--app-text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    /* Marco de Celular Móvil */
+    .phone-frame {
+      width: 100%;
+      max-width: 390px;
+      height: 844px;
+      background-color: var(--app-bg);
+      border-radius: 44px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), inset 0 0 0 10px #1a120e;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Barra Superior con Opciones Visuales */
+    .phone-header-top {
+      background: var(--coffee-dark);
+      color: #ffffff;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--coffee-med);
+    }
+
+    .badge-accessible {
+      background: #5c3a21;
+      border: 1px solid #70472a;
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Contenedor de Pantallas */
+    .screen-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 90px;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .card {
+      background: var(--app-card);
+      border: 1.5px solid var(--app-border);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(44, 34, 30, 0.04);
+    }
+
+    .hero-card {
+      text-align: center;
+      padding: 30px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .coffee-logo {
+      width: 80px;
+      height: 80px;
+      background: var(--coffee-dark);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      box-shadow: 0 8px 20px rgba(59, 34, 18, 0.25);
+    }
+
+    .btn-primary {
+      background: var(--coffee-dark);
+      color: #ffffff;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      min-height: 56px;
+      box-shadow: 0 6px 16px rgba(59, 34, 18, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: var(--app-card);
+      color: var(--app-text);
+      border: 2px solid var(--app-border);
+      padding: 14px;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      min-height: 50px;
+    }
+
+    /* Buscador adaptado con botón grande de voz */
+    .search-box-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 2px solid var(--app-border);
+      background: var(--app-card);
+      color: var(--app-text);
+      font-size: 1rem;
+      min-height: 52px;
+    }
+
+    .btn-voice {
+      background: var(--coffee-dark);
+      border: none;
+      color: #ffffff;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(59, 34, 18, 0.2);
+    }
+
+    /* Barra de Navegación Inferior (Basada en símbolos e iconos grandes) */
+    .mobile-tabbar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--app-card);
+      border-top: 2px solid var(--app-border);
+      height: 80px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 8px;
+      z-index: 30;
+    }
+
+    .tab-item {
+      background: transparent;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--app-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 1;
+      padding: 6px 0;
+    }
+
+    .tab-item.active {
+      color: var(--coffee-dark);
+      transform: scale(1.05);
+    }
+
+    .tab-icon {
+      font-size: 26px;
+    }
+
+    .toast {
+      position: absolute;
+      bottom: 95px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2c221e;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+      z-index: 40;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-frame">
+    
+    <!-- Barra Superior -->
+    <header class="phone-header-top">
+      <div class="badge-accessible">♿ 100% Accesible Visual</div>
+      <span style="font-weight: 800; font-size: 0.95rem;">BrewGo App</span>
+    </header>
+
+    <!-- Pantallas de la App -->
+    <main class="screen-container">
+      
+      <!-- INICIO -->
+      <section class="screen active" id="screen-1">
+        <div class="card hero-card">
+          <div class="coffee-logo">☕</div>
+          <h1 style="font-size: 1.8rem; font-weight: 800; color: var(--coffee-dark);">Toca para Pedir</h1>
+          <p style="font-size: 0.95rem; color: var(--app-muted); line-height: 1.5;">
+            Diseñado con imágenes, botones grandes y comandos de voz para facilitar tu pedido de inmediato.
+          </p>
+          <button class="btn-primary" onclick="goToScreen(2)">
+            <span>☕</span> Ver el Menú
+          </button>
+        </div>
+      </section>
+
+      <!-- MENÚ Y BÚSQUEDA POR VOZ -->
+      <section class="screen" id="screen-2">
+        <div class="card" style="text-align: center; background: var(--coffee-dark); color: #fff;">
+          <h2 style="font-size: 1.4rem; margin-bottom: 6px;">Búsqueda por Voz</h2>
+          <p style="font-size: 0.85rem; opacity: 0.85; margin-bottom: 14px;">Toca el micrófono 🎙️ y di qué café deseas</p>
+          <div class="search-box-wrapper">
+            <input type="text" id="searchInput" class="search-input" placeholder="Toca el micrófono..." oninput="filterMenu(this.value)" />
+            <button class="btn-voice" onclick="simulateVoiceInput()" title="Hablar">🎙️</button>
+          </div>
+        </div>
+
+        <div id="menuList" style="display:flex; flex-direction:column; gap:12px;"></div>
+      </section>
+
+      <!-- CARRITO -->
+      <section class="screen" id="screen-4">
+        <h2 style="font-size: 1.4rem;">🛒 Tu Carrito</h2>
+        <div id="cartItems" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.2rem;">
+            <span>Total:</span>
+            <span id="cartTotal">$0.00</span>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="goToScreen(5)">💳 Pagar Ahora</button>
+      </section>
+
+      <!-- PAGO -->
+      <section class="screen" id="screen-5">
+        <h2 style="font-size: 1.4rem;">💳 Confirmar Pago</h2>
+        <div class="card" style="text-align:center;">
+          <p style="font-size: 1.1rem; font-weight:700; margin-bottom:12px;">Punto de Retiro: Barra #2</p>
+          <button class="btn-primary" onclick="confirmOrder()">✅ ¡Listo, Pedir!</button>
+        </div>
+      </section>
+
+      <!-- ÉXITO -->
+      <section class="screen" id="screen-6">
+        <div class="card hero-card" style="border-color: var(--success);">
+          <div style="font-size: 56px;">🎉</div>
+          <h2 style="color: var(--success); font-size:1.4rem;">¡Pedido Exitoso!</h2>
+          <p style="font-size: 1rem;">Recoge tu bebida en la barra en <strong>4 minutos</strong>.</p>
+          <button class="btn-secondary" onclick="goToScreen(1)">🏠 Volver al Inicio</button>
+        </div>
+      </section>
+
+      <!-- AYUDA / ASISTENCIA VISUAL -->
+      <section class="screen" id="screen-7">
+        <div class="card hero-card">
+          <div style="font-size: 48px;">🛎️</div>
+          <h2 style="font-size: 1.4rem; color: var(--coffee-dark);">¿Necesitas Ayuda?</h2>
+          <p style="font-size: 0.95rem; color: var(--app-muted);">Toca el botón para llamar a un mesero o barista inmediatamente.</p>
+          <button class="btn-primary" onclick="showToast('🔔 Un empleado viene en camino a ayudarte.')">
+            <span>👋</span> Llamar a Asistencia
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Barra Inferior de Iconos Claros -->
+    <nav class="mobile-tabbar">
+      <button class="tab-item active" id="tab-1" onclick="goToScreen(1)">
+        <span class="tab-icon">🏠</span>
+        <span>Inicio</span>
+      </button>
+      <button class="tab-item" id="tab-2" onclick="goToScreen(2)">
+        <span class="tab-icon">☕</span>
+        <span>Menú</span>
+      </button>
+      <button class="tab-item" id="tab-4" onclick="goToScreen(4)">
+        <span class="tab-icon">🛒</span>
+        <span>Carrito</span>
+      </button>
+      <button class="tab-item" id="tab-7" onclick="goToScreen(7)">
+        <span class="tab-icon">🛎️</span>
+        <span>Ayuda</span>
+      </button>
+    </nav>
+
+    <!-- Toast de Notificación -->
+    <div class="toast" id="toastBox"></div>
+
+  </div>
+
+  <script>
+    const products = [
+      { id: 1, name: "☕ Café Latte Vainilla", price: 3.50, desc: "Dulce y suave" },
+      { id: 2, name: "🍊 Cold Brew con Naranja", price: 4.00, desc: "Frío y refrescante" },
+      { id: 3, name: "🍵 Té Matcha Helado", price: 4.25, desc: "Verde y natural" },
+      { id: 4, name: "☕ Cappuccino Clásico", price: 3.20, desc: "Espuma cremosa" }
+    ];
+
+    let cart = [{ name: "☕ Café Latte Vainilla", price: 3.50 }];
+
+    function renderMenu() {
+      const container = document.getElementById("menuList");
+      container.innerHTML = "";
+      products.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.display = "flex";
+        div.style.flexDirection = "column";
+        div.style.gap = "10px";
+        div.innerHTML = `
+          <div>
+            <strong style="font-size: 1.15rem;">${p.name}</strong>
+            <p style="font-size: 0.85rem; color: var(--app-muted);">${p.desc}</p>
+            <div style="font-weight: 800; color: var(--coffee-med); font-size: 1.1rem; margin-top: 4px;">$${p.price.toFixed(2)}</div>
+          </div>
+          <button class="btn-primary" style="padding: 10px; min-height: 44px; font-size: 0.95rem;" onclick="addToCart('${p.name}', ${p.price})">
+            ➕ Agregar al Pedido
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function simulateVoiceInput() {
+      showToast("🎙️ Escuchando voz...");
+      setTimeout(() => {
+        document.getElementById("searchInput").value = "Latte";
+        filterMenu("Latte");
+        showToast("✓ Encontrado: Latte");
+      }, 1500);
+    }
+
+    function filterMenu(query) {
+      const q = query.toLowerCase();
+      const container = document.getElementById("menuList");
+      container.innerHTML = "";
+      const filtered = products.filter(p => p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+      
+      filtered.forEach(p => {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `
+          <div>
+            <strong style="font-size: 1.15rem;">${p.name}</strong>
+            <p style="font-size: 0.85rem; color: var(--app-muted);">${p.desc}</p>
+            <div style="font-weight: 800; color: var(--coffee-med); font-size: 1.1rem; margin-top: 4px;">$${p.price.toFixed(2)}</div>
+          </div>
+          <button class="btn-primary" style="padding: 10px; min-height: 44px; font-size: 0.95rem; margin-top:8px;" onclick="addToCart('${p.name}', ${p.price})">
+            ➕ Agregar al Pedido
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      updateCartUI();
+      showToast("✓ ¡Agregado al carrito!");
+      goToScreen(4);
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+      showToast("Ítem eliminado");
+    }
+
+    function updateCartUI() {
+      const box = document.getElementById("cartItems");
+      box.innerHTML = "";
+      let total = 0;
+      cart.forEach((item, idx) => {
+        total += item.price;
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.display = "flex";
+        div.style.justifyContent = "space-between";
+        div.style.alignItems = "center";
+        div.style.padding = "12px 16px";
+        div.innerHTML = `
+          <div>
+            <strong style="font-size: 0.95rem;">${item.name}</strong>
+            <div style="color: var(--coffee-med); font-weight: 800; font-size: 0.95rem;">$${item.price.toFixed(2)}</div>
+          </div>
+          <button class="btn-secondary" style="width: auto; padding: 6px 12px; min-height: 36px; color: #b91c1c; border-color: #fca5a5;" onclick="removeFromCart(${idx})">❌</button>
+        `;
+        box.appendChild(div);
+      });
+
+      if (cart.length === 0) {
+        box.innerHTML = `<div class="card" style="text-align:center;"><p style="color: var(--app-muted);">Tu carrito está vacío.</p></div>`;
+      }
+      document.getElementById("cartTotal").textContent = `$${total.toFixed(2)}`;
+    }
+
+    function confirmOrder() {
+      if (cart.length === 0) {
+        showToast("Agrega al menos un producto");
+        return;
+      }
+      cart = [];
+      updateCartUI();
+      goToScreen(6);
+    }
+
+    function goToScreen(num) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      const target = document.getElementById("screen-" + num);
+      if (target) target.classList.add("active");
+
+      document.querySelectorAll(".tab-item").forEach(t => t.classList.remove("active"));
+      const activeTab = document.getElementById("tab-" + num);
+      if (activeTab) activeTab.classList.add("active");
+
+      const container = document.querySelector(".screen-container");
+      if (container) container.scrollTop = 0;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toastBox");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2500);
+    }
+
+    renderMenu();
+    updateCartUI();
+  </script>
+</body>
+</html>
