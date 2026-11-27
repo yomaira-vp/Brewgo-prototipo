@@ -452,7 +452,7 @@
           <div class="coffee-logo">☕</div>
           <h1 style="font-size: 1.7rem; font-weight: 800;">Toca para Pedir</h1>
           <p style="font-size: 0.95rem; color: var(--app-muted); line-height: 1.45;">
-            Explora por categorías, personaliza tu pedido con cantidad o pídelo para retiro o a domicilio.
+            Explora por categorías, personaliza tu pedido según el producto o pídelo para retiro o a domicilio.
           </p>
           <button class="btn-primary" onclick="goToScreen(2)">
             <span>☕</span> Ver el Menú
@@ -475,7 +475,7 @@
             <button class="btn-voice" onclick="startVoiceRecognition()" title="Usar micrófono">🎙️</button>
           </div>
           <p id="voiceStatus" style="font-size: 0.8rem; margin-top: 8px; opacity: 0.9;">
-            Toca un producto para elegir tamaño, leche y cantidad.
+            Toca un producto para ver sus opciones y cantidad.
           </p>
         </div>
 
@@ -492,7 +492,7 @@
         <div id="menuList" style="display:flex; flex-direction:column; gap:10px;"></div>
       </section>
 
-      <!-- 9. DETALLE Y PERSONALIZACIÓN DEL PRODUCTO -->
+      <!-- 9. DETALLE Y PERSONALIZACIÓN ADAPTADA POR PRODUCTO -->
       <section class="screen" id="screen-9">
         <button class="btn-secondary" onclick="goToScreen(2)">⬅️ Volver al menú</button>
 
@@ -503,25 +503,24 @@
           <p id="detailDesc" style="font-size: 0.9rem; color: var(--app-muted);"></p>
         </div>
 
-        <div class="card" style="display:flex; flex-direction:column; gap:8px;">
-          <label for="optSize" style="font-weight: 800;">1. Tamaño</label>
+        <!-- Bloque 1: Tamaño (solo bebidas) -->
+        <div class="card" id="sizeCard" style="display:flex; flex-direction:column; gap:8px;">
+          <label for="optSize" style="font-weight: 800;">1. Tamaño de bebida</label>
           <select id="optSize" class="custom-select" onchange="updateDetailTotal()">
             <option value="0" data-label="Normal">Normal (Sin costo extra)</option>
             <option value="0.60" data-label="Grande (+$0.60)">Grande (+$0.60)</option>
           </select>
         </div>
 
-        <div class="card" style="display:flex; flex-direction:column; gap:8px;">
-          <label for="optMilk" style="font-weight: 800;">2. Tipo de Leche / Preferencia</label>
-          <select id="optMilk" class="custom-select" onchange="updateDetailTotal()">
-            <option value="0" data-label="Leche normal / Estándar">Leche normal / Estándar</option>
-            <option value="0.50" data-label="Leche de Avena (+$0.50)">Leche de Avena (+$0.50)</option>
-            <option value="0.50" data-label="Sin azúcar / A gusto">Sin azúcar / A gusto</option>
-          </select>
+        <!-- Bloque 2: Preferencia dinámica según categoría -->
+        <div class="card" id="prefCard" style="display:flex; flex-direction:column; gap:8px;">
+          <label for="optPref" id="prefLabel" style="font-weight: 800;">2. Tipo de Leche / Preferencia</label>
+          <select id="optPref" class="custom-select" onchange="updateDetailTotal()"></select>
         </div>
 
+        <!-- Bloque 3: Cantidad -->
         <div class="card">
-          <p style="font-weight: 800;">3. Cantidad de unidades</p>
+          <p id="qtyLabel" style="font-weight: 800;">3. Cantidad de unidades</p>
           <div class="qty-box">
             <button class="qty-btn" onclick="changeDetailQty(-1)">-</button>
             <span class="qty-number" id="detailQty">1</span>
@@ -668,15 +667,15 @@
 
   <script>
     const products = [
-      { id: 1, category: "Cafés", name: "☕ Café Latte Vainilla", price: 3.50, desc: "Dulce, suave y con toque de vainilla" },
-      { id: 2, category: "Cafés", name: "☕ Cappuccino Clásico", price: 3.20, desc: "Espresso con espuma cremosa" },
-      { id: 3, category: "Cafés", name: "🍫 Chocolate Caliente", price: 3.40, desc: "Cacao cremoso ideal para acompañar" },
-      { id: 4, category: "Té y Fríos", name: "🍊 Cold Brew con Naranja", price: 4.00, desc: "Café frío con cítrico refrescante" },
-      { id: 5, category: "Té y Fríos", name: "🍵 Té Matcha Helado", price: 4.25, desc: "Té verde batido con hielo" },
-      { id: 6, category: "Té y Fríos", name: "🥤 Limonada de Hierbabuena", price: 2.50, desc: "Fresca y sin cafeína" },
-      { id: 7, category: "Panadería", name: "🥐 Croissant de Mantequilla", price: 2.75, desc: "Horneado, suave y hojaldrado" },
-      { id: 8, category: "Panadería", name: "🍰 Torta de Zanahoria", price: 3.80, desc: "Esponjosa con cobertura suave" },
-      { id: 9, category: "Panadería", name: "🥖 Pan de Yuca Tibio (x3)", price: 2.25, desc: "Recién horneado y suave por dentro" }
+      { id: 1, category: "Cafés", name: "☕ Café Latte Vainilla", price: 3.50, desc: "Dulce, suave y con toque de vainilla", hasMilk: true },
+      { id: 2, category: "Cafés", name: "☕ Cappuccino Clásico", price: 3.20, desc: "Espresso con espuma cremosa", hasMilk: true },
+      { id: 3, category: "Cafés", name: "🍫 Chocolate Caliente", price: 3.40, desc: "Cacao cremoso ideal para acompañar", hasMilk: true },
+      { id: 4, category: "Té y Fríos", name: "🍊 Cold Brew con Naranja", price: 4.00, desc: "Café frío con cítrico refrescante", hasMilk: false },
+      { id: 5, category: "Té y Fríos", name: "🍵 Té Matcha Helado", price: 4.25, desc: "Té verde batido con hielo", hasMilk: true },
+      { id: 6, category: "Té y Fríos", name: "🥤 Limonada de Hierbabuena", price: 2.50, desc: "Fresca y sin cafeína", hasMilk: false },
+      { id: 7, category: "Panadería", name: "🥐 Croissant de Mantequilla", price: 2.75, desc: "Horneado, suave y hojaldrado", hasMilk: false },
+      { id: 8, category: "Panadería", name: "🍰 Torta de Zanahoria", price: 3.80, desc: "Esponjosa con cobertura suave", hasMilk: false },
+      { id: 9, category: "Panadería", name: "🥖 Pan de Yuca Tibio (x3)", price: 2.25, desc: "Recién horneado y suave por dentro", hasMilk: false }
     ];
 
     let selectedProduct = products[0];
@@ -737,7 +736,7 @@
             <div style="font-weight: 800; font-size: 1.05rem; margin-top: 6px;">$${p.price.toFixed(2)}</div>
           </div>
           <button class="btn-primary" style="padding: 10px; min-height: 44px; font-size: 0.95rem;" onclick="openProductDetail(${p.id})">
-            ⚙️ Personalizar y Elegir Cantidad
+            ⚙️ Elegir Opciones y Cantidad
           </button>
         `;
         container.appendChild(div);
@@ -754,9 +753,48 @@
       document.getElementById("detailName").textContent = found.name;
       document.getElementById("detailPrice").textContent = `$${found.price.toFixed(2)}`;
       document.getElementById("detailDesc").textContent = found.desc;
-      document.getElementById("optSize").value = "0";
-      document.getElementById("optMilk").value = "0";
       document.getElementById("detailQty").textContent = "1";
+
+      const sizeCard = document.getElementById("sizeCard");
+      const optSize = document.getElementById("optSize");
+      const prefLabel = document.getElementById("prefLabel");
+      const optPref = document.getElementById("optPref");
+      const qtyLabel = document.getElementById("qtyLabel");
+
+      optSize.value = "0";
+      optPref.innerHTML = "";
+
+      if (found.category === "Panadería") {
+        // Postres y panadería: sin tamaño ni leche
+        sizeCard.style.display = "none";
+        prefLabel.textContent = "1. Presentación / Temperatura";
+        optPref.innerHTML = `
+          <option value="0" data-label="Porción estándar">Porción estándar</option>
+          <option value="0" data-label="Calentado / Tibio">Calentado / Tibio (Sin costo)</option>
+          <option value="0" data-label="Empaque para llevar">Empaque para llevar</option>
+        `;
+        qtyLabel.textContent = "2. Cantidad de unidades";
+      } else if (found.hasMilk) {
+        // Bebidas con leche
+        sizeCard.style.display = "flex";
+        prefLabel.textContent = "2. Tipo de Leche / Azúcar";
+        optPref.innerHTML = `
+          <option value="0" data-label="Leche normal">Leche normal (Sin costo)</option>
+          <option value="0.50" data-label="Leche de Avena (+$0.50)">Leche de Avena (+$0.50)</option>
+          <option value="0" data-label="Sin azúcar">Sin azúcar</option>
+        `;
+        qtyLabel.textContent = "3. Cantidad de unidades";
+      } else {
+        // Bebidas frías sin leche (Cold Brew, Limonada)
+        sizeCard.style.display = "flex";
+        prefLabel.textContent = "2. Nivel de Dulce / Hielo";
+        optPref.innerHTML = `
+          <option value="0" data-label="Dulce normal · Con hielo">Dulce normal · Con hielo</option>
+          <option value="0" data-label="Poco hielo">Poco hielo</option>
+          <option value="0" data-label="Sin azúcar">Sin azúcar</option>
+        `;
+        qtyLabel.textContent = "3. Cantidad de unidades";
+      }
 
       updateDetailTotal();
       goToScreen(9);
@@ -769,9 +807,10 @@
     }
 
     function getUnitConfiguredPrice() {
-      const sizeExtra = parseFloat(document.getElementById("optSize").value) || 0;
-      const milkExtra = parseFloat(document.getElementById("optMilk").value) || 0;
-      return selectedProduct.price + sizeExtra + milkExtra;
+      const sizeVisible = document.getElementById("sizeCard").style.display !== "none";
+      const sizeExtra = sizeVisible ? (parseFloat(document.getElementById("optSize").value) || 0) : 0;
+      const prefExtra = parseFloat(document.getElementById("optPref").value) || 0;
+      return selectedProduct.price + sizeExtra + prefExtra;
     }
 
     function updateDetailTotal() {
@@ -780,15 +819,21 @@
     }
 
     function addCustomizedToCart() {
+      const sizeVisible = document.getElementById("sizeCard").style.display !== "none";
       const sizeSel = document.getElementById("optSize");
-      const milkSel = document.getElementById("optMilk");
-      const sizeLabel = sizeSel.options[sizeSel.selectedIndex].dataset.label;
-      const milkLabel = milkSel.options[milkSel.selectedIndex].dataset.label;
+      const prefSel = document.getElementById("optPref");
+      const prefLabel = prefSel.options[prefSel.selectedIndex].dataset.label;
       const unitPrice = getUnitConfiguredPrice();
+
+      let detailText = prefLabel;
+      if (sizeVisible) {
+        const sizeLabel = sizeSel.options[sizeSel.selectedIndex].dataset.label;
+        detailText = `${sizeLabel} · ${prefLabel}`;
+      }
 
       cart.push({
         name: selectedProduct.name,
-        detail: `${sizeLabel} · ${milkLabel}`,
+        detail: detailText,
         qty: detailQty,
         unitPrice
       });
