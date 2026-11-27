@@ -228,6 +228,52 @@
       color: #000000;
     }
 
+    /* Botones de Categorías */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .cat-btn {
+      background: var(--app-card);
+      color: var(--app-text);
+      border: 2px solid var(--app-border);
+      border-radius: 14px;
+      padding: 10px 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 46px;
+    }
+
+    .cat-btn.active {
+      background: var(--coffee-dark);
+      color: #ffffff;
+      border-color: var(--coffee-dark);
+    }
+
+    body.high-contrast .cat-btn.active {
+      background: #fde047;
+      color: #000000;
+      border-color: #fde047;
+    }
+
+    .cat-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 10px;
+      background: var(--app-bg);
+      border: 1px solid var(--app-border);
+      margin-bottom: 4px;
+    }
+
     .setting-row {
       display: flex;
       justify-content: space-between;
@@ -350,7 +396,7 @@
           <div class="coffee-logo">☕</div>
           <h1 style="font-size: 1.7rem; font-weight: 800;">Toca para Pedir</h1>
           <p style="font-size: 0.95rem; color: var(--app-muted); line-height: 1.45;">
-            Pide tu café y acompañamientos en tu celular con botones grandes, lectura por voz y ajustes visuales.
+            Explora por categorías, busca por voz y ajusta el tamaño o contraste de pantalla a tu gusto.
           </p>
           <button class="btn-primary" onclick="goToScreen(2)">
             <span>☕</span> Ver el Menú
@@ -361,7 +407,7 @@
         </div>
       </section>
 
-      <!-- 2. MENÚ Y BÚSQUEDA POR VOZ -->
+      <!-- 2. MENÚ CON CATEGORÍAS Y BÚSQUEDA -->
       <section class="screen" id="screen-2">
         <div class="card" style="text-align: center; background: var(--coffee-dark); color: #ffffff;">
           <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Buscar o Pedir por Voz</h2>
@@ -369,12 +415,23 @@
             Escribe un producto o toca el micrófono para hablar
           </p>
           <div class="search-box-wrapper">
-            <input type="text" id="searchInput" class="search-input" placeholder="Ej. Latte, Croissant, Té..." oninput="filterMenu(this.value)" />
+            <input type="text" id="searchInput" class="search-input" placeholder="Ej. Latte, Croissant, Té..." oninput="applyFilters()" />
             <button class="btn-voice" onclick="startVoiceRecognition()" title="Usar micrófono">🎙️</button>
           </div>
           <p id="voiceStatus" style="font-size: 0.8rem; margin-top: 8px; opacity: 0.9;">
-            Tip: Si tu celular no activa el micrófono aquí, escribe el nombre en el cuadro.
+            Tip: También puedes tocar una categoría aquí abajo.
           </p>
+        </div>
+
+        <!-- Guía de Categorías -->
+        <div>
+          <p style="font-size: 0.88rem; font-weight: 800; margin-bottom: 8px;">📂 Elige una categoría:</p>
+          <div class="category-grid">
+            <button class="cat-btn active" id="cat-Todos" onclick="selectCategory('Todos')">🍽️ Todos</button>
+            <button class="cat-btn" id="cat-Cafés" onclick="selectCategory('Cafés')">☕ Cafés</button>
+            <button class="cat-btn" id="cat-Té y Fríos" onclick="selectCategory('Té y Fríos')">🍵 Té y Fríos</button>
+            <button class="cat-btn" id="cat-Panadería" onclick="selectCategory('Panadería')">🥐 Panadería</button>
+          </div>
         </div>
 
         <div id="menuList" style="display:flex; flex-direction:column; gap:10px;"></div>
@@ -502,16 +559,18 @@
 
   <script>
     const products = [
-      { id: 1, name: "☕ Café Latte Vainilla", price: 3.50, desc: "Dulce, suave y con toque de vainilla" },
-      { id: 2, name: "🍊 Cold Brew con Naranja", price: 4.00, desc: "Café frío con cítrico refrescante" },
-      { id: 3, name: "🍵 Té Matcha Helado", price: 4.25, desc: "Té verde batido con hielo" },
-      { id: 4, name: "☕ Cappuccino Clásico", price: 3.20, desc: "Espresso con espuma cremosa" },
-      { id: 5, name: "🥐 Croissant de Mantequilla", price: 2.75, desc: "Horneado, suave y hojaldrado" },
-      { id: 6, name: "🍫 Chocolate Caliente", price: 3.40, desc: "Cacao cremoso ideal para acompañar" },
-      { id: 7, name: "🍰 Porción de Torta de Zanahoria", price: 3.80, desc: "Esponjosa con cobertura suave" },
-      { id: 8, name: "🥤 Limonada de Hierbabuena", price: 2.50, desc: "Fresca y sin cafeína" }
+      { id: 1, category: "Cafés", name: "☕ Café Latte Vainilla", price: 3.50, desc: "Dulce, suave y con toque de vainilla" },
+      { id: 2, category: "Cafés", name: "☕ Cappuccino Clásico", price: 3.20, desc: "Espresso con espuma cremosa" },
+      { id: 3, category: "Cafés", name: "🍫 Chocolate Caliente", price: 3.40, desc: "Cacao cremoso ideal para acompañar" },
+      { id: 4, category: "Té y Fríos", name: "🍊 Cold Brew con Naranja", price: 4.00, desc: "Café frío con cítrico refrescante" },
+      { id: 5, category: "Té y Fríos", name: "🍵 Té Matcha Helado", price: 4.25, desc: "Té verde batido con hielo" },
+      { id: 6, category: "Té y Fríos", name: "🥤 Limonada de Hierbabuena", price: 2.50, desc: "Fresca y sin cafeína" },
+      { id: 7, category: "Panadería", name: "🥐 Croissant de Mantequilla", price: 2.75, desc: "Horneado, suave y hojaldrado" },
+      { id: 8, category: "Panadería", name: "🍰 Torta de Zanahoria", price: 3.80, desc: "Esponjosa con cobertura suave" },
+      { id: 9, category: "Panadería", name: "🥖 Pan de Yuca Tibio (x3)", price: 2.25, desc: "Recién horneado y suave por dentro" }
     ];
 
+    let selectedCategory = "Todos";
     let cart = [{ name: "☕ Café Latte Vainilla", price: 3.50 }];
     let orders = [
       {
@@ -525,12 +584,30 @@
     let contrastOn = false;
     let largeTextOn = false;
 
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("active"));
+      const activeBtn = document.getElementById("cat-" + cat);
+      if (activeBtn) activeBtn.classList.add("active");
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+      const filtered = products.filter(p => {
+        const matchesCat = selectedCategory === "Todos" || p.category === selectedCategory;
+        const matchesText = !query || p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query);
+        return matchesCat && matchesText;
+      });
+      renderMenu(filtered);
+    }
+
     function renderMenu(list = products) {
       const container = document.getElementById("menuList");
       container.innerHTML = "";
 
       if (list.length === 0) {
-        container.innerHTML = `<div class="card" style="text-align:center;"><p style="color: var(--app-muted);">No encontramos productos con ese nombre.</p></div>`;
+        container.innerHTML = `<div class="card" style="text-align:center;"><p style="color: var(--app-muted);">No encontramos productos en esta categoría o búsqueda.</p></div>`;
         return;
       }
 
@@ -542,6 +619,7 @@
         div.style.gap = "8px";
         div.innerHTML = `
           <div>
+            <span class="cat-tag">${p.category}</span><br/>
             <strong style="font-size: 1.08rem;">${p.name}</strong>
             <p style="font-size: 0.85rem; color: var(--app-muted); margin-top: 2px;">${p.desc}</p>
             <div style="font-weight: 800; font-size: 1.05rem; margin-top: 6px;">$${p.price.toFixed(2)}</div>
@@ -577,7 +655,7 @@
           const spokenText = event.results[0][0].transcript;
           document.getElementById("searchInput").value = spokenText;
           statusEl.textContent = `Escuchamos: "${spokenText}"`;
-          filterMenu(spokenText);
+          selectCategory("Todos");
         };
 
         recognition.onerror = () => {
@@ -589,18 +667,6 @@
       } catch (e) {
         statusEl.textContent = "Activa los permisos del micrófono o escribe el producto que buscas.";
       }
-    }
-
-    function filterMenu(query) {
-      const q = query.trim().toLowerCase();
-      if (!q) {
-        renderMenu(products);
-        return;
-      }
-      const filtered = products.filter(
-        p => p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)
-      );
-      renderMenu(filtered);
     }
 
     function addToCart(name, price) {
